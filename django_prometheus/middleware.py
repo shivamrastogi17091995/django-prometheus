@@ -1,7 +1,10 @@
 from prometheus_client import Counter, Histogram
 
 from django.conf import settings
-from django.utils.deprecation import MiddlewareMixin
+try:
+    from django.utils.deprecation import MiddlewareMixin
+except ImportError:
+    MiddlewareMixin = object
 from django_prometheus.conf import NAMESPACE
 from django_prometheus.utils import PowersOf, Time, TimeSince
 
@@ -190,7 +193,7 @@ class PrometheusBeforeMiddleware(MiddlewareMixin):
     metrics_cls = Metrics
 
     def __init__(self, get_response=None):
-        super().__init__(get_response)
+        super(PrometheusBeforeMiddleware, self).__init__(get_response)
         self.metrics = self.metrics_cls.get_instance()
 
     def process_request(self, request):
@@ -214,7 +217,7 @@ class PrometheusAfterMiddleware(MiddlewareMixin):
     metrics_cls = Metrics
 
     def __init__(self, get_response=None):
-        super().__init__(get_response)
+        super(PrometheusAfterMiddleware, self).__init__(get_response)
         self.metrics = self.metrics_cls.get_instance()
 
     def _transport(self, request):
